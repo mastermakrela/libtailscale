@@ -116,6 +116,26 @@ typedef int tailscale_listener;
 // Returns zero on success or -1 on error, call tailscale_errmsg for details.
 extern int tailscale_listen(tailscale sd, const char* network, const char* addr, tailscale_listener* listener_out);
 
+// tailscale_listen_funnel announces on the public internet using Tailscale Funnel.
+//
+// It also by default listens on your local tailnet, so connections can
+// come from either inside or outside your network. To restrict connections
+// to be just from the internet, use the FunnelOnly option.
+//
+// Currently, (2024-12-13), Funnel only supports TCP on ports 443, 8443, and 10000.
+// The supported host name is limited to that configured for the tsnet.Server.
+//
+// It is the spiritual equivalent to listen(2).
+// The newly allocated listener is written to listener_out.
+//
+// network is a NUL-terminated string of the form "tcp", "udp", etc.
+// addr is a NUL-terminated string of an IP address or domain name.
+//
+// It will start the server if it has not been started yet.
+//
+// Returns zero on success or -1 on error, call tailscale_errmsg for details.
+extern int tailscale_listen_funnel(tailscale sd, const char* network, const char* addr, int funnelOnly, tailscale_listener* listener_out);
+
 // tailscale_accept accepts a connection on a tailscale_listener.
 //
 // It is the spiritual equivalent to accept(2).
@@ -127,6 +147,17 @@ extern int tailscale_listen(tailscale sd, const char* network, const char* addr,
 // 	EBADF - listener is not a valid tailscale
 // 	-1    - call tailscale_errmsg for details
 extern int tailscale_accept(tailscale_listener listener, tailscale_conn* conn_out);
+
+// tailscale_accept_nonblocking accepts a connection on a tailscale_listener.
+//
+// Acts like tailscale_accept but if there is no connection to accept return immediately.
+// Uses MSG_DONTWAIT flag to achieve this.
+//
+// Returns:
+// 	0     - success
+// 	EBADF - listener is not a valid tailscale
+// 	-1    - call tailscale_errmsg for details
+extern int tailscale_accept_nonblocking(tailscale_listener listener, tailscale_conn* conn_out);
 
 // tailscale_loopback starts a loopback address server.
 //
