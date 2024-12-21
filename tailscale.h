@@ -213,6 +213,17 @@ extern "C"
     // 	EBADF  - sd is not a valid tailscale
     // 	ERANGE - insufficient storage for buf
     extern int tailscale_errmsg(tailscale sd, char *buf, size_t buflen);
+    // tailscale_ips retrieves the IPv4 and IPv6 addresses of the node.
+    // If the node has not yet joined a tailnet or is otherwise unaware of its own IP addresses,
+    // then this function will error.
+    //
+    extern int tailscale_ips(tailscale sd, char *ipv4, char *ipv6);
+
+    // tailscale_cert_domains returns the list of domains for which the server can
+    // provide TLS certificates. These are also the DNS names for the Server.
+    //
+    // If the server is not running, it returns nil.
+    extern int tailscale_cert_domains(tailscale sd, char *buf, size_t buflen);
 
 #ifdef __cplusplus
 }
