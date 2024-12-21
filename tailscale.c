@@ -23,6 +23,8 @@ extern int TsnetSetLogFD(int sd, int fd);
 extern int TsnetListen(int sd, char* net, char* addr, int* listenerOut);
 extern int TsnetListenFunnel(int sd, char *net, char *addr, int funnelOnly, int *listenerOut);
 extern int TsnetLoopback(int sd, char* addrOut, size_t addrLen, char* proxyOut, char* localOut);
+extern int TailscaleIPs(int sd, char* ipv4, char* ipv6);
+extern int CertDomains(int sd, char* buf, size_t buflen);
 
 tailscale tailscale_new() {
 	return TsnetNewServer();
@@ -117,4 +119,12 @@ int tailscale_loopback(tailscale sd, char* addr_out, size_t addrlen, char* proxy
 
 int tailscale_errmsg(tailscale sd, char* buf, size_t buflen) {
 	return TsnetErrmsg(sd, buf, buflen);
+}
+
+int tailscale_ips(tailscale sd, char* ipv4, char* ipv6) {
+	return TailscaleIPs(sd, ipv4, ipv6);
+}
+
+int tailscale_cert_domains(tailscale sd, char* buf, size_t buflen) {
+	return CertDomains(sd, buf, buflen);
 }
