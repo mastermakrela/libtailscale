@@ -49,6 +49,10 @@ int tailscale_listen(tailscale sd, const char* network, const char* addr, tailsc
 	return TsnetListen(sd, (char*)network, (char*)addr, (int*)listener_out);
 }
 
+int tailscale_listen_funnel(tailscale sd, const char* network, const char* addr, int funnelOnly, tailscale_listener* listener_out) {
+	return TsnetListenFunnel(sd, (char*) network, (char*) addr, funnelOnly, (int*) listener_out);
+}
+
 int _tailscale_accept(tailscale_listener ld, tailscale_conn* conn_out, int flags)
 {
 	struct msghdr msg = {0};
