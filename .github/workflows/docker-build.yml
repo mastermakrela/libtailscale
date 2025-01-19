@@ -22,11 +22,16 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Create datetime tag
+        id: datetime
+        run: echo "tag=$(date +'%Y%m%d-%H%M')" >> $GITHUB_OUTPUT
+
       - name: Build and push multi-arch image
         uses: docker/build-push-action@v4
         with:
           context: .
           file: Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}:latest
+          tags: |
+            ghcr.io/${{ github.repository }}:latest
+            ghcr.io/${{ github.repository }}:${{ steps.datetime.outputs.tag }}
           platforms: linux/amd64,linux/arm64

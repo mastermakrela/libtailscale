@@ -625,47 +625,12 @@ func TsnetLoopback(sd C.int, addrOut *C.char, addrLen C.size_t, proxyOut *C.char
 	return 0
 }
 
-//export TailscaleIPs
-func TailscaleIPs(sd C.int, ipv4 *C.char, ipv6 *C.char) C.int {
-	if ipv4 == nil || ipv6 == nil {
-		panic("ipv4 or ipv6 is nil")
-	}
-
-	s, err := getServer(sd)
-	if err != nil {
-		return s.recErr(err)
-	}
-
-	ip4, ip6 := s.s.TailscaleIPs()
-
-	ipv4Out := unsafe.Slice((*byte)(unsafe.Pointer(ipv4)), 16)
-	ipv6Out := unsafe.Slice((*byte)(unsafe.Pointer(ipv6)), 40)
-
-	if ip4.IsValid() {
-		ipv4Str := ip4.String()
-		n := copy(ipv4Out, ipv4Str)
-		ipv4Out[n] = 0 // NUL terminate
-	} else {
-		ipv4Out[0] = 0
-	}
-
-	if ip6.IsValid() {
-		ipv6Str := ip6.String()
-		n := copy(ipv6Out, ipv6Str)
-		ipv6Out[n] = 0 // NUL terminate
-	} else {
-		ipv6Out[0] = 0
-	}
-
-	return 0
-}
-
-//export CertDomains
-func CertDomains(sd C.int, buf *C.char, buflen C.size_t) C.int {
+//export TsnetGetCertDomains
+func TsnetGetCertDomains(sd C.int, buf *C.char, buflen C.size_t) C.int {
 	if buf == nil {
-		panic("certdomains passed nil buf")
+		panic("TsnetGetCertDomains passed nil buf")
 	} else if buflen == 0 {
-		panic("certdomains passed buflen of 0")
+		panic("TsnetGetCertDomains passed buflen of 0")
 	}
 
 	s, err := getServer(sd)

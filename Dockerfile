@@ -9,4 +9,4 @@ RUN CGO_ENABLED=1 go build -buildmode=c-shared -o libtailscale.so
 
 # Final stage
 FROM debian:bullseye-slim
-COPY --from=builder /build/libtailscale.so ./
+COPY --from=builder /build/libtailscale.so ./var/lib/libtailscale.so
