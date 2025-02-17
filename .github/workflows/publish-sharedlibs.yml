@@ -5,37 +5,67 @@ on:
     branches: [cross-compile]
 
 jobs:
-  build-libs:
+  build_linux:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        include:
-          - goos: linux
-            goarch: amd64
-            ext: so
-          - goos: windows
-            goarch: amd64
-            ext: dll
-          - goos: darwin
-            goarch: amd64
-            ext: dylib
-          - goos: darwin
-            goarch: arm64
-            ext: dylib
+        arch: [amd64, arm64]
     steps:
       - uses: actions/checkout@v3
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: "1.23.1"
-      - name: Build
-        run: go build -buildmode=c-shared -o output.${{ matrix.ext }}
+      - name: Build Linux
+        run: go build -buildmode=c-shared -o output.so
         env:
           CGO_ENABLED: 1
-          GOOS: ${{ matrix.goos }}
-          GOARCH: ${{ matrix.goarch }}
+          GOOS: linux
+          GOARCH: ${{ matrix.arch }}
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.goos }}-${{ matrix.goarch }}
-          path: output.${{ matrix.ext }}
+          name: linux-${{ matrix.arch }}
+          path: output.so
+
+  build_macos:
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.23.1"
+      - name: Build macOS
+        run: go build -buildmode=c-shared -o output.dylib
+        env:
+          CGO_ENABLED: 1
+          GOOS: darwin
+          GOARCH: ${{ matrix.arch }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: darwin-${{ matrix.arch }}
+          path: output.dylib
+#   build_windows:
+#     runs-on: windows-latest
+#     steps:
+#       - uses: actions/checkout@v3
+#       - name: Set up Go
+#         uses: actions/setup-go@v3
+#         with:
+#           go-version: "1.23.1"
+#       - name: Build Windows
+#         run: go build -buildmode=c-shared -o output.dll
+#         env:
+#           CGO_ENABLED: 1
+#           GOOS: windows
+#           GOARCH: amd64
+#       - name: Upload artifact
+#         uses: actions/upload-artifact@v4
+#         with:
+#           name: windows-amd64
+#           path: output.dll
