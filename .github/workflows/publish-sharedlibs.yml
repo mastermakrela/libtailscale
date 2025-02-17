@@ -1,0 +1,42 @@
+name: Cross-Compile Shared Libraries
+
+on:
+  push:
+    branches: [cross-compile]
+
+jobs:
+  build-libs:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+        include:
+          - goos: linux
+            goarch: amd64
+            ext: so
+          - goos: windows
+            goarch: amd64
+            ext: dll
+          - goos: darwin
+            goarch: amd64
+            ext: dylib
+          - goos: darwin
+            goarch: arm64
+            ext: dylib
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: "1.20"
+      - name: Build
+        run: go build -buildmode=c-shared -o output.${{ matrix.ext }}
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.goos }}-${{ matrix.goarch }}
+          path: output.${{ matrix.ext }}
