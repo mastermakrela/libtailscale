@@ -2,8 +2,8 @@ name: Cross-Compile Shared Libraries
 
 on:
   push:
-    branches: [cross-compile]
-  workflow_dispatch:
+    tags:
+      - "*"
 
 jobs:
   build_linux:
