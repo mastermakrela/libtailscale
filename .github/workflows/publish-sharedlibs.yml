@@ -9,8 +9,6 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        goos: [linux, windows, darwin]
-        goarch: [amd64, arm64]
         include:
           - goos: linux
             goarch: amd64
@@ -33,6 +31,7 @@ jobs:
       - name: Build
         run: go build -buildmode=c-shared -o output.${{ matrix.ext }}
         env:
+          CGO_ENABLED: 1
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
       - name: Upload artifact
