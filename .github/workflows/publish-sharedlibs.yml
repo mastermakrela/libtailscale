@@ -23,21 +23,19 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: "1.23.1"
-      - name: Create output directory
-        run: mkdir -p linux-${{ matrix.arch }}
       - name: Build Linux
-        run: go build -buildmode=c-shared -o linux-${{ matrix.arch }}/output.so
+        run: go build -buildmode=c-shared -o libtailscale-linux-${{ matrix.arch }}.so
         env:
           CGO_ENABLED: 1
           GOOS: linux
           GOARCH: ${{ matrix.arch }}
       - name: List files
-        run: ls -R linux-${{ matrix.arch }}
+        run: ls -l libtailscale-linux-${{ matrix.arch }}.so
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: linux-${{ matrix.arch }}
-          path: linux-${{ matrix.arch }}/output.so
+          name: libtailscale-linux-${{ matrix.arch }}.so
+          path: libtailscale-linux-${{ matrix.arch }}.so
 
   build_macos:
     runs-on: macos-latest
@@ -50,21 +48,19 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: "1.23.1"
-      - name: Create output directory
-        run: mkdir -p darwin-${{ matrix.arch }}
       - name: Build macOS
-        run: go build -buildmode=c-shared -o darwin-${{ matrix.arch }}/output.dylib
+        run: go build -buildmode=c-shared -o libtailscale-darwin-${{ matrix.arch }}.dylib
         env:
           CGO_ENABLED: 1
           GOOS: darwin
           GOARCH: ${{ matrix.arch }}
       - name: List files
-        run: ls -R darwin-${{ matrix.arch }}
+        run: ls -l libtailscale-darwin-${{ matrix.arch }}.dylib
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: darwin-${{ matrix.arch }}
-          path: darwin-${{ matrix.arch }}/output.dylib
+          name: libtailscale-darwin-${{ matrix.arch }}.dylib
+          path: libtailscale-darwin-${{ matrix.arch }}.dylib
 
   create_release:
     needs: [build_linux, build_macos]
@@ -73,35 +69,33 @@ jobs:
       - name: Download Linux amd64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: linux-amd64
-          path: linux-amd64
+          name: libtailscale-linux-amd64.so
+          path: .
       - name: Download Linux arm64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: linux-arm64
-          path: linux-arm64
+          name: libtailscale-linux-arm64.so
+          path: .
       - name: Download macOS amd64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: darwin-amd64
-          path: darwin-amd64
+          name: libtailscale-darwin-amd64.dylib
+          path: .
       - name: Download macOS arm64 artifact
         uses: actions/download-artifact@v4
         with:
-          name: darwin-arm64
-          path: darwin-arm64
+          name: libtailscale-darwin-arm64.dylib
+          path: .
       - name: List downloaded files
-        run: |
-          ls -R linux-*
-          ls -R darwin-*
+        run: ls -l libtailscale-*
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            linux-amd64/output.so
-            linux-arm64/output.so
-            darwin-amd64/output.dylib
-            darwin-arm64/output.dylib
+            libtailscale-linux-amd64.so
+            libtailscale-linux-arm64.so
+            libtailscale-darwin-amd64.dylib
+            libtailscale-darwin-arm64.dylib
           fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
