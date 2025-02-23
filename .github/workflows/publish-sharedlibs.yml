@@ -7,18 +7,25 @@ on:
 
 jobs:
   build_linux:
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
+    container:
+      image: debian:bullseye
+      options: --platform=${{ matrix.platform }}
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
-            arch: amd64
+          - arch: amd64
             platform: linux/amd64
-          - os: ubuntu-24.04-arm
-            arch: arm64
+            cc: gcc
+          - arch: arm64
             platform: linux/arm64
+            cc: aarch64-linux-gnu-gcc
     steps:
       - uses: actions/checkout@v3
+      - name: Install dependencies
+        run: |
+          apt-get update
+          apt-get install -y wget git gcc gcc-aarch64-linux-gnu
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
@@ -29,6 +36,7 @@ jobs:
           CGO_ENABLED: 1
           GOOS: linux
           GOARCH: ${{ matrix.arch }}
+          CC: ${{ matrix.cc }}
       - name: List files
         run: ls -l libtailscale-linux-${{ matrix.arch }}.so
       - name: Upload artifact
