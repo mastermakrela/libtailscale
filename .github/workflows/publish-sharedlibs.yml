@@ -23,17 +23,21 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: "1.23.1"
+      - name: Create output directory
+        run: mkdir -p linux-${{ matrix.arch }}
       - name: Build Linux
-        run: go build -buildmode=c-shared -o output.so
+        run: go build -buildmode=c-shared -o linux-${{ matrix.arch }}/output.so
         env:
           CGO_ENABLED: 1
           GOOS: linux
           GOARCH: ${{ matrix.arch }}
+      - name: List files
+        run: ls -R linux-${{ matrix.arch }}
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-${{ matrix.arch }}
-          path: output.so
+          path: linux-${{ matrix.arch }}/output.so
 
   build_macos:
     runs-on: macos-latest
@@ -46,26 +50,26 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: "1.23.1"
+      - name: Create output directory
+        run: mkdir -p darwin-${{ matrix.arch }}
       - name: Build macOS
-        run: go build -buildmode=c-shared -o output.dylib
+        run: go build -buildmode=c-shared -o darwin-${{ matrix.arch }}/output.dylib
         env:
           CGO_ENABLED: 1
           GOOS: darwin
           GOARCH: ${{ matrix.arch }}
+      - name: List files
+        run: ls -R darwin-${{ matrix.arch }}
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: darwin-${{ matrix.arch }}
-          path: output.dylib
+          path: darwin-${{ matrix.arch }}/output.dylib
 
   create_release:
     needs: [build_linux, build_macos]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Create directories
-        run: |
-          mkdir -p linux-amd64 linux-arm64 darwin-amd64 darwin-arm64
       - name: Download Linux amd64 artifact
         uses: actions/download-artifact@v4
         with:
@@ -86,6 +90,10 @@ jobs:
         with:
           name: darwin-arm64
           path: darwin-arm64
+      - name: List downloaded files
+        run: |
+          ls -R linux-*
+          ls -R darwin-*
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
